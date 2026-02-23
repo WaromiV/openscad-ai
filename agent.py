@@ -148,6 +148,7 @@ def render_openscad(scad_code: str, image_sizes: list[str] | None = None) -> str
         mesh_stats = _mesh_stats_from_ascii_stl(stl_path)
 
         renders: list[dict[str, str]] = []
+        has_explicit_camera = "$vpt" in scad_code or "$vpd" in scad_code
         for size in sizes:
             width, height = _validate_size(size)
             timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
@@ -160,12 +161,11 @@ def render_openscad(scad_code: str, image_sizes: list[str] | None = None) -> str
                 str(scad_path),
                 "--render",
                 f"--imgsize={width},{height}",
-                "--autocenter",
-                "--viewall",
                 "--projection=o",
                 "--view=axes,scales,edges",
-                "--colorscheme=Tomorrow",
             ]
+            if not has_explicit_camera:
+                cmd.extend(["--autocenter", "--viewall"])
             proc = subprocess.run(cmd, check=True, text=True, capture_output=True)
             log_text = proc.stdout.strip() or proc.stderr.strip() or "render complete"
             renders.append(

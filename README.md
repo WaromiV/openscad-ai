@@ -9,12 +9,18 @@ This project provides a Python LangChain agent that:
 5. Loads API credentials from `.env` at runtime
 6. Defaults to annotation-friendly high-resolution renders (`1600x1200`)
 
+It also includes a standalone MCP server (`mcp_server.py`) so any MCP-compatible
+LLM client can call OpenSCAD rendering as a tool and receive image content blocks.
+
 It also includes a rich chat-like TUI (`tui.py`) for iterative image-to-OpenSCAD reconstruction.
 
 ## Files
 
 - `agent.py` - main agent entrypoint
 - `tui.py` - rich chat-like iterative reconstruction TUI
+- `mcp_server.py` - standalone MCP tool server over stdio
+- `mcp_http_server.py` - standalone MCP server over HTTP (`/mcp`)
+- `mcp_servers.example.json` - sample MCP client server config
 - `.env` - runtime environment variables (includes dummy key)
 - `requirements.txt` - Python dependencies
 
@@ -61,6 +67,33 @@ Rich TUI mode:
 ```bash
 python tui.py
 ```
+
+MCP server mode (stdio transport):
+
+```bash
+python mcp_server.py
+```
+
+MCP server mode (HTTP transport):
+
+```bash
+python mcp_http_server.py --host 127.0.0.1 --port 8765
+```
+
+### MCP tool contract
+
+The server exposes one MCP tool: `render_openscad`.
+
+- Input:
+  - `scad_code` (string, required)
+  - `image_sizes` (array of `WIDTHxHEIGHT` strings, optional)
+- Output:
+  - `content` blocks including:
+    - `type: "text"` status/details
+    - `type: "image"` with base64 `data` and `mimeType: "image/png"`
+  - `structuredContent` with overlay metadata, mesh stats, edge counter, and image paths
+
+Example MCP client config is provided in `mcp_servers.example.json`.
 
 ### TUI workflow
 

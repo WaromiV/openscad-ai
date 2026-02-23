@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "openscad-render": {
+      "command": "python",
+      "args": [
+        "mcp_server.py"
+      ]
+    }
+  }
+}
